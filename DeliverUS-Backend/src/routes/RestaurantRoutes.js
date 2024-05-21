@@ -69,6 +69,7 @@ const loadFileRoutes = function (app) {
       hasRole('owner'),
       checkEntityExists(Restaurant, 'restaurantId'),
       RestaurantMiddleware.checkRestaurantOwnership,
+      RestaurantMiddleware.restaurantHasNoOrdersToDeliver,
       RestaurantController.changeStatus)
 }
 export default loadFileRoutes
