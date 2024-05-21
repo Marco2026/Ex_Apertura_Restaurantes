@@ -77,6 +77,24 @@ export default function RestaurantsScreen ({ navigation, route }) {
             </TextRegular>
           </View>
         </Pressable>
+
+        <Pressable
+        onPress={() => { setRestaurantToBeDeleted(item) }}
+            style={({ pressed }) => [
+              {
+                backgroundColor: pressed
+                  ? GlobalStyles.brandSuccess
+                  : GlobalStyles.brandSuccess
+              },
+              styles.actionButton
+            ]}>
+          <View style={[{ flex: 1, flexDirection: 'row', justifyContent: 'center' }]}>
+            <MaterialCommunityIcons name='clock' color={'white'} size={20}/>
+            <TextRegular textStyle={styles.text}>
+              { item.status }
+            </TextRegular>
+          </View>
+        </Pressable>
         </View>
       </ImageCard>
     )
@@ -200,8 +218,8 @@ const styles = StyleSheet.create({
   actionButtonsContainer: {
     flexDirection: 'row',
     bottom: 5,
-    position: 'absolute',
-    width: '90%'
+    position: 'relative',
+    width: '65%'
   },
   text: {
     fontSize: 16,
