@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { StyleSheet, FlatList, Pressable, View } from 'react-native'
 
-import { getAll, remove } from '../../api/RestaurantEndpoints'
+import { getAll, remove, changeStatus } from '../../api/RestaurantEndpoints'
 import ImageCard from '../../components/ImageCard'
 import TextSemiBold from '../../components/TextSemibold'
 import TextRegular from '../../components/TextRegular'
@@ -36,6 +36,7 @@ export default function RestaurantsScreen ({ navigation, route }) {
         }}
       >
         <TextRegular numberOfLines={2}>{item.description}</TextRegular>
+        <TextSemiBold>This restaurant is: <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>{item.status}</TextSemiBold></TextSemiBold>
         {item.averageServiceMinutes !== null &&
           <TextSemiBold>Avg. service time: <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>{item.averageServiceMinutes} min.</TextSemiBold></TextSemiBold>
         }
@@ -59,7 +60,7 @@ export default function RestaurantsScreen ({ navigation, route }) {
             </TextRegular>
           </View>
         </Pressable>
-
+        
         <Pressable
             onPress={() => { setRestaurantToBeDeleted(item) }}
             style={({ pressed }) => [
@@ -78,23 +79,26 @@ export default function RestaurantsScreen ({ navigation, route }) {
           </View>
         </Pressable>
 
-        <Pressable
-        onPress={() => { setRestaurantToBeDeleted(item) }}
-            style={({ pressed }) => [
-              {
-                backgroundColor: pressed
-                  ? GlobalStyles.brandSuccess
-                  : GlobalStyles.brandSuccess
-              },
-              styles.actionButton
-            ]}>
-          <View style={[{ flex: 1, flexDirection: 'row', justifyContent: 'center' }]}>
-            <MaterialCommunityIcons name='clock' color={'white'} size={20}/>
-            <TextRegular textStyle={styles.text}>
-              { item.status }
-            </TextRegular>
-          </View>
-        </Pressable>
+        { (item.status === 'online' || item.status === 'offline') &&
+          <Pressable
+          onPress={() => { changeRestaurantStatus(item) }}
+              style={({ pressed }) => [
+                {
+                  backgroundColor: pressed
+                    ? '#A0A808'
+                    : GlobalStyles.brandSuccess
+                },
+                styles.actionButton
+              ]}>
+            <View style={[{ flex: 1, flexDirection: 'row', justifyContent: 'center' }]}>
+              <MaterialCommunityIcons name='clock' color={'white'} size={20}/>
+              <TextRegular textStyle={styles.text}>
+                { item.status }
+              </TextRegular>
+            </View>
+          </Pressable>
+        }
+        
         </View>
       </ImageCard>
     )
@@ -171,6 +175,28 @@ export default function RestaurantsScreen ({ navigation, route }) {
     }
   }
 
+  const changeRestaurantStatus = async (restaurant) => {
+    try {
+      await changeStatus(restaurant.id)
+      await fetchRestaurants()
+      showMessage({
+        message: `Restaurant ${restaurant.name} status succesfully changed`,
+        type: 'success',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    } catch (error) {
+      console.log(error)
+      setRestaurantToBeDeleted(null)
+      showMessage({
+        message: `Restaurant ${restaurant.name} status could not be changed.`,
+        type: 'error',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    }
+  }
+
   return (
     <>
     <FlatList
@@ -218,8 +244,8 @@ const styles = StyleSheet.create({
   actionButtonsContainer: {
     flexDirection: 'row',
     bottom: 5,
-    position: 'relative',
-    width: '65%'
+    position: 'absolute',
+    width: '63%'
   },
   text: {
     fontSize: 16,
